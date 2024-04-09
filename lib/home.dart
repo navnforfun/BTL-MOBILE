@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'securitylog.dart' as a;
+import 'package:mobile_sercutity/app.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'notification_service.dart';
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -18,11 +22,12 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     fetchDataFromAPI();
+    LocalNotificationService.initialize();
   }
 
   Future<void> fetchDataFromAPI() async {
-    final response = await http.get(Uri.parse('http://192.168.12.174:5257/DashBoard/laststatedata'));
-
+    final response = await http.get(Uri.parse(host+'DashBoard/laststatedata'));
+    print(response.body);
     if (response.statusCode == 200) {
       Map<String, dynamic> data = jsonDecode(response.body);
 
@@ -32,12 +37,13 @@ class _HomeState extends State<Home> {
         gasData = data.containsKey('gas') ? data['gas'].toString() : '';
         humidityData = data.containsKey('humidity') ? data['humidity'].toString() : '';
 
-
-        if (temperatureData.isNotEmpty || waterData.isNotEmpty || gasData.isNotEmpty || humidityData.isNotEmpty) {
-          status = 'Warning';
-        } else {
-          status = 'An Toàn';
-        }
+        //
+        // if (temperatureData.isNotEmpty || waterData.isNotEmpty || gasData.isNotEmpty || humidityData.isNotEmpty) {
+        //   status = 'Warning';
+        // } else {
+        //   status = 'An Toàn';
+        // }
+        status =data["state"];
       });
     } else {
       print('Failed to load data: ${response.statusCode}');

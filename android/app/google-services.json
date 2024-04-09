@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "251602999713",
+    "project_id": "home-security-alert-a3663",
+    "storage_bucket": "home-security-alert-a3663.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251602999713:android:e2a56644e3be99c5d113e0",
+        "android_client_info": {
+          "package_name": "com.example.mobile_sercutity"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6wfn1FMhq-Doz1IMa-Ivn9NNDdGLDCbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
