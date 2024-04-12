@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'securitylog.dart' as a;
 import 'package:mobile_sercutity/app.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'notification_service.dart';
+import 'package:prompt_dialog/prompt_dialog.dart';
+
+// import 'package:just_audio/.dart';
+import 'package:just_audio/just_audio.dart';
+import 'dart:async';
 
 class Home extends StatefulWidget {
   @override
@@ -12,30 +15,45 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String temperatureData = '';
-  String waterData = '';
-  String gasData = '';
-  String humidityData = '';
+  double temperatureData = 0;
+  double waterData = 0;
+  double gasData = 0;
+  double humidityData = 0;
+  double thresholdT = 50;
+  double thresholdW = 500;
+  double thresholdG = 500;
+  double thresholdH = 90;
   String status = 'An Toàn';
+  Color color1 = Colors.blue[300]!;
+  Color color2 = Colors.blue[700]!;
 
+  final player = AudioPlayer(); // Create a player
   @override
   void initState() {
     super.initState();
     fetchDataFromAPI();
-    LocalNotificationService.initialize();
+    updateData();
+  }
+
+  void updateData() {
+    const oneSec = Duration(seconds: 2);
+    Timer.periodic(oneSec, (Timer t) {
+      fetchDataFromAPI();
+    });
   }
 
   Future<void> fetchDataFromAPI() async {
-    final response = await http.get(Uri.parse(host+'DashBoard/laststatedata'));
+    final response =
+        await http.get(Uri.parse(host + 'DashBoard/laststatedata'));
     print(response.body);
     if (response.statusCode == 200) {
       Map<String, dynamic> data = jsonDecode(response.body);
 
       setState(() {
-        temperatureData = data.containsKey('temperature') ? data['temperature'].toString() : '';
-        waterData = data.containsKey('water') ? data['water'].toString() : '';
-        gasData = data.containsKey('gas') ? data['gas'].toString() : '';
-        humidityData = data.containsKey('humidity') ? data['humidity'].toString() : '';
+        temperatureData = data['temperature'] + 0.0;
+        waterData = data['water'] + 0.0;
+        gasData = data['gas'] + 0.0;
+        humidityData = data['humidity'] + 0.0;
 
         //
         // if (temperatureData.isNotEmpty || waterData.isNotEmpty || gasData.isNotEmpty || humidityData.isNotEmpty) {
@@ -43,11 +61,36 @@ class _HomeState extends State<Home> {
         // } else {
         //   status = 'An Toàn';
         // }
-        status =data["state"];
+        // status = data["state"];
+        status = "Stable";
+        if (thresholdT < temperatureData) {
+          status = "Fire";
+        } else if (thresholdW < waterData) {
+          status = "Water";
+        } else if (thresholdG < gasData) {
+          status = "Gas";
+        } else if (thresholdH < humidityData) {
+          status = "Humidity";
+        }
+        if (status != "Humidity" && status != "Stable") {
+          playSampleSound();
+          color1 = Colors.red[400]!;
+          color2 = Colors.red[700]!;
+        } else {
+          color1 = Colors.blue[300]!;
+          color2 = Colors.blue[700]!;
+        }
       });
     } else {
       print('Failed to load data: ${response.statusCode}');
     }
+  }
+
+  void playSampleSound() async {
+    AudioPlayer player = AudioPlayer();
+    // await player.setAsset('https://file-examples.com/storage/fe0e2ce82f660c1579f31b4/2017/11/file_example_MP3_700KB.mp3');
+    await player.setAsset("assets/alarm.mp3");
+    player.play();
   }
 
   @override
@@ -62,8 +105,8 @@ class _HomeState extends State<Home> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF64B5F6),
-              Color(0xFF1976D2),
+              color1,
+              color2,
             ],
           ),
         ),
@@ -104,20 +147,126 @@ class _HomeState extends State<Home> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildGridItem(context, '🔥', temperatureData),
+                  GestureDetector(
+                    child: _buildGridItem(context, '🔥', temperatureData.toString()),
+                    onTap: () async{
+                      const String initialValue = '';
+                      String? s = await prompt(
+                        context,
+                        title: const Text('Chỉnh ngưỡng cảnh báo fire'),
+                        textOK: const Text('OK'),
+                        textCancel: const Text('Cancel'),
+                        hintText: 'Nhập giá trị',
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
+
+                        textAlign: TextAlign.center,
+                        // controller: TextEditingController(text: initialValue),
+                      );
+                      print(s.toString());
+                      // double value = double.parse(.toString());
+                      setState(() {
+                        thresholdT = double.parse(s.toString());
+                      });
+                    }
+                  ),
                   SizedBox(width: 20),
-                  _buildGridItem(context, '💦', waterData),
+                  GestureDetector(
+                      child:
+                          _buildGridItem(context, '💦', waterData.toString()),
+                      onTap: () async {
+                        const String initialValue = '';
+                        String? s = await prompt(
+                          context,
+                          title: const Text('Chỉnh ngưỡng cảnh báo water'),
+                          textOK: const Text('OK'),
+                          textCancel: const Text('Cancel'),
+                          hintText: 'Nhập giá trị',
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+
+                          textAlign: TextAlign.center,
+                          // controller: TextEditingController(text: initialValue),
+                        );
+                        print(s.toString());
+                        // double value = double.parse(.toString());
+                        setState(() {
+                          thresholdW = double.parse(s.toString());
+                        });
+                      })
                 ],
               ),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildGridItem(context, '💥', gasData),
+                  GestureDetector(
+                    onTap: () async {
+                      const String initialValue = '';
+                      String? s = await prompt(
+                        context,
+                        title: const Text('Chỉnh ngưỡng cảnh báo gas'),
+                        textOK: const Text('OK'),
+                        textCancel: const Text('Cancel'),
+                        hintText: 'Nhập giá trị',
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
+
+                        textAlign: TextAlign.center,
+                        // controller: TextEditingController(text: initialValue),
+                      );
+                      print(s.toString());
+                      // double value = double.parse(.toString());
+                      setState(() {
+                        thresholdG = double.parse(s.toString());
+                      });
+                    },
+                    child: _buildGridItem(context, '💥', gasData.toString()),
+                  ),
                   SizedBox(width: 20),
-                  _buildGridItem(context, '🌳', humidityData),
+                  GestureDetector(
+                    child: _buildGridItem(context, '🌳', humidityData.toString()),
+                    onTap: () async {
+                      const String initialValue = '';
+                      String? s = await prompt(
+                        context,
+                        title: const Text('Chỉnh ngưỡng cảnh báo humidity'),
+                        textOK: const Text('OK'),
+                        textCancel: const Text('Cancel'),
+                        hintText: 'Nhập giá trị',
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
+
+                        textAlign: TextAlign.center,
+                        // controller: TextEditingController(text: initialValue),
+                      );
+                      print(s.toString());
+                      // double value = double.parse(.toString());
+                      setState(() {
+                        thresholdH = double.parse(s.toString());
+                      });
+                    },
+                  ),
+
                 ],
               ),
+
             ],
           ),
         ),

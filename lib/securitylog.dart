@@ -15,23 +15,22 @@ class myChart extends StatefulWidget {
 }
 
 class _myChartState extends State<myChart> {
-   bool _loading = true;
+  bool _loading = true;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getData();
+    print("-=-===-=-=----");
   }
 
   void getData() async {
-    print("1");
     await getChartData();
-    print("2");
+
     setState(() {
       _loading = false;
       print(_loading);
-
     });
   }
 
@@ -54,25 +53,25 @@ class _myChartState extends State<myChart> {
                       style: TextStyle(
                           color: Colors.redAccent, fontWeight: FontWeight.bold),
                     ),
-                    LineChartWidget(tem, Colors.redAccent),
+                    LineChartWidget(tem, Colors.redAccent, 0, 70),
                     Text(
                       "Humidity",
                       style: TextStyle(
                           color: Colors.green, fontWeight: FontWeight.bold),
                     ),
-                    LineChartWidget(hum, Colors.green),
+                    LineChartWidget(hum, Colors.green, 0, 120),
                     Text(
                       "Gas",
                       style: TextStyle(
                           color: Colors.grey, fontWeight: FontWeight.bold),
                     ),
-                    LineChartWidget(gas, Colors.grey),
+                    LineChartWidget(gas, Colors.grey, 100, 700),
                     Text(
                       "Water",
                       style: TextStyle(
                           color: Colors.blue, fontWeight: FontWeight.bold),
                     ),
-                    LineChartWidget(gas, Colors.blue),
+                    LineChartWidget(gas, Colors.blue, 100, 700),
                   ],
                 ),
               )
@@ -88,19 +87,22 @@ class _myChartState extends State<myChart> {
 class LineChartWidget extends StatelessWidget {
   final List<double> points;
   final Color color;
+  final double x;
+  final double y;
 
-  LineChartWidget(this.points, this.color, {Key? key}) : super(key: key);
+  LineChartWidget(this.points, this.color, this.x, this.y, {Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 2,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+        padding: EdgeInsets.only(bottom: 10,top: 10,right: 10,left: 0),
         child: LineChart(
           LineChartData(
-            minY: points[0] - 20,
-            maxY: points[9] + 5,
+            minY: x,
+            maxY: y,
             titlesData: FlTitlesData(
               show: true,
               rightTitles: const AxisTitles(
@@ -122,7 +124,6 @@ class LineChartWidget extends StatelessWidget {
             lineBarsData: [
               LineChartBarData(
                   spots: data(points).map((e) {
-                    print(e);
                     return FlSpot(e[1]!, e[2]!);
                   }).toList(),
                   // spots: Map([1,3]),

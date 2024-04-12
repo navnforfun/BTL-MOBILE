@@ -1,2 +1,2 @@
-final host = "http://192.168.0.108:5257/";
+final host = "http://localhost:5257/";
 
