@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:flutter/animation.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_sercutity/app.dart';
+import 'package:intl/intl.dart';
 
 List<double> tem = [];
 List<double> hum = [];
@@ -27,4 +27,19 @@ List<double> toDouble(List x) {
     myList.add(value + 0.0);
   }).toList();
   return myList;
+}
+Future<List<String>> getLogCamera(int n) async{
+  var response = await http.get(Uri.parse(host + 'home/ListStateCamera?n=${n}'));
+  var data = json.decode(response.body);
+  List<String> times = [];
+  for(int i =0 ; i< data.length; i++){
+
+// Parse the datetime string
+    DateTime dateTime = DateTime.parse(data[i]['time'] );
+    DateFormat formatter = DateFormat('dd/MM/yyyy');
+    String formattedDate = formatter.format(dateTime);
+    times.add(formattedDate);
+  }
+  print(times);
+  return  times;
 }

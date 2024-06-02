@@ -1,10 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mobile_sercutity/api/getChartAPI.dart';
 import 'securitylog.dart' as a;
 import 'package:mobile_sercutity/app.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
-
+import 'cameraScreen.dart' as cameraScreen;
 // import 'package:just_audio/.dart';
 import 'package:just_audio/just_audio.dart';
 import 'dart:async';
@@ -33,6 +35,8 @@ class _HomeState extends State<Home> {
     super.initState();
     fetchDataFromAPI();
     updateData();
+    print("run");
+    getLogCamera(5);
   }
 
   void updateData() {
@@ -45,7 +49,7 @@ class _HomeState extends State<Home> {
   Future<void> fetchDataFromAPI() async {
     final response =
         await http.get(Uri.parse(host + 'DashBoard/laststatedata'));
-    print(response.body);
+    // print(response.body);
     if (response.statusCode == 200) {
       Map<String, dynamic> data = jsonDecode(response.body);
 
@@ -148,32 +152,32 @@ class _HomeState extends State<Home> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
-                    child: _buildGridItem(context, '🔥', temperatureData.toString()),
-                    onTap: () async{
-                      const String initialValue = '';
-                      String? s = await prompt(
-                        context,
-                        title: const Text('Chỉnh ngưỡng cảnh báo fire'),
-                        textOK: const Text('OK'),
-                        textCancel: const Text('Cancel'),
-                        hintText: 'Nhập giá trị',
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter some text';
-                          }
-                          return null;
-                        },
+                      child: _buildGridItem(
+                          context, '🔥', temperatureData.toString()),
+                      onTap: () async {
+                        const String initialValue = '';
+                        String? s = await prompt(
+                          context,
+                          title: const Text('Chỉnh ngưỡng cảnh báo fire'),
+                          textOK: const Text('OK'),
+                          textCancel: const Text('Cancel'),
+                          hintText: 'Nhập giá trị',
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
 
-                        textAlign: TextAlign.center,
-                        // controller: TextEditingController(text: initialValue),
-                      );
-                      print(s.toString());
-                      // double value = double.parse(.toString());
-                      setState(() {
-                        thresholdT = double.parse(s.toString());
-                      });
-                    }
-                  ),
+                          textAlign: TextAlign.center,
+                          // controller: TextEditingController(text: initialValue),
+                        );
+                        print(s.toString());
+                        // double value = double.parse(.toString());
+                        setState(() {
+                          thresholdT = double.parse(s.toString());
+                        });
+                      }),
                   SizedBox(width: 20),
                   GestureDetector(
                       child:
@@ -237,7 +241,8 @@ class _HomeState extends State<Home> {
                   ),
                   SizedBox(width: 20),
                   GestureDetector(
-                    child: _buildGridItem(context, '🌳', humidityData.toString()),
+                    child:
+                        _buildGridItem(context, '🌳', humidityData.toString()),
                     onTap: () async {
                       const String initialValue = '';
                       String? s = await prompt(
@@ -263,10 +268,45 @@ class _HomeState extends State<Home> {
                       });
                     },
                   ),
-
                 ],
               ),
-
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => cameraScreen.CameraScreen(cameraIp: videoUrl,)),
+                      );
+                    },
+                    child: Container(
+                      width: 320,
+                      height: 50,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                            'Camera security'
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              )
             ],
           ),
         ),
