@@ -1,24 +1,26 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:flutter/animation.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_sercutity/app.dart';
 import 'package:intl/intl.dart';
 
-List<double> tem = [];
-List<double> hum = [];
-List<double> gas = [];
-List<double> water = [];
+
 String x = "hi";
 
-Future<void> getChartData() async {
+Future<Map<String,List<double>>> getChartData() async {
   var response =
   await http.get(Uri.parse(host + 'DashBoard/GetStateData?n=10'));
   var data = json.decode(response.body) as Map<String, dynamic>;
 
-  tem = toDouble(data["temperature"]);
-  hum = toDouble(data["humidity"]);
-  gas = toDouble(data["gas"]);
-  water = toDouble(data["water"]);
+
+  Map<String,List<double>> result = {
+    'tem' : toDouble(data["temperature"]),
+    'hum' : toDouble(data["humidity"]),
+    'gas' : toDouble(data["gas"]),
+    'water' : toDouble(data["water"]),
+  };
+  return result;
 }
 
 List<double> toDouble(List x) {
@@ -26,7 +28,7 @@ List<double> toDouble(List x) {
   x.map((value) {
     myList.add(value + 0.0);
   }).toList();
-  return myList;
+  return myList.reversed.toList();
 }
 Future<List<String>> getLogCamera(int n) async{
   var response = await http.get(Uri.parse(host + 'home/ListStateCamera?n=${n}'));
@@ -40,6 +42,5 @@ Future<List<String>> getLogCamera(int n) async{
     String formattedDate = formatter.format(dateTime);
     times.add(formattedDate);
   }
-  print(times);
   return  times;
 }

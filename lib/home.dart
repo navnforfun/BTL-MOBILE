@@ -1,16 +1,18 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mobile_sercutity/api/getChartAPI.dart';
+import 'package:mobile_sercutity/login.dart';
 import 'securitylog.dart' as a;
 import 'package:mobile_sercutity/app.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
 import 'cameraScreen.dart' as cameraScreen;
-// import 'package:just_audio/.dart';
 import 'package:just_audio/just_audio.dart';
 import 'dart:async';
-
+import 'package:localstorage/localstorage.dart';
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -37,6 +39,17 @@ class _HomeState extends State<Home> {
     updateData();
     print("run");
     getLogCamera(5);
+  }
+  Future<void> logout() async{
+    await initLocalStorage();
+
+
+      localStorage.setItem('name', '');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => login()),
+      );
+
   }
 
   void updateData() {
@@ -101,7 +114,21 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tình trạng toà nhà'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Tình trạng toà nhà'),
+            GestureDetector(
+              onTap: () {
+               logout();
+              },
+              child: Text('Logout',style: TextStyle(
+                decoration: TextDecoration.underline,
+                fontSize: 15
+              ),),
+            )
+          ],
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(

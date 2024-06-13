@@ -6,7 +6,7 @@ import 'test.dart';
 import 'package:mobile_sercutity/price_point.dart';
 import 'package:mobile_sercutity/api/getChartAPI.dart';
 import 'package:mobile_sercutity/chartPoint.dart';
-
+import 'dart:async';
 class myChart extends StatefulWidget {
   const myChart({super.key});
 
@@ -16,21 +16,35 @@ class myChart extends StatefulWidget {
 
 class _myChartState extends State<myChart> {
   bool _loading = true;
-
+  List<double> tem = [];
+  List<double> hum = [];
+  List<double> gas = [];
+  List<double> water = [];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getData();
+    updateData();
     print("-=-===-=-=----");
+  }
+  void updateData() {
+    const oneSec = Duration(seconds: 2);
+    Timer.periodic(oneSec, (Timer t) {
+      getData();
+    });
   }
 
   void getData() async {
-    await getChartData();
-
+    var chartData = await getChartData();
+print(chartData);
     setState(() {
       _loading = false;
       print(_loading);
+  tem =  chartData['tem']!;
+  hum =  chartData['hum']!;
+  gas =  chartData['gas']!;
+  water =  chartData['water']!;
     });
   }
 
